@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
+import { provideRouter } from "@angular/router";
 
 import { AuthLayout } from "./auth-layout";
 
@@ -9,6 +10,9 @@ describe("AuthLayout", () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [AuthLayout],
+      // Le composant contient des liens de routage : sans routeur de test,
+      // l'injection de ActivatedRoute échoue.
+      providers: [provideRouter([])],
     }).compileComponents();
 
     fixture = TestBed.createComponent(AuthLayout);

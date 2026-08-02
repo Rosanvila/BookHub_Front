@@ -14,10 +14,12 @@ describe('App', () => {
     expect(app).toBeTruthy();
   });
 
-  it('should render title', async () => {
+  it("should expose a router outlet", async () => {
     const fixture = TestBed.createComponent(App);
     await fixture.whenStable();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Hello, bookHub');
+    // Le composant racine ne fait que porter le routeur : c'est bien la
+    // présence de la zone de rendu des routes que l'on vérifie ici.
+    expect(compiled.querySelector("router-outlet")).toBeTruthy();
   });
 });
