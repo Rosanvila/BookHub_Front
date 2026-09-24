@@ -21,8 +21,4 @@ export class LibrarianService {
   getAllReservations() {
     return this.http.get<Reservation[]>(this.reservationsUrl);
   }
-
-  validateReservation(id: number) {
-    return this.http.put<void>(`${this.reservationsUrl}/${id}/validate`, {});
-  }
 }

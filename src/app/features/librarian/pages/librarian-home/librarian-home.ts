@@ -84,16 +84,6 @@ export class LibrarianHome {
       });
   }
 
-  validateReservation(id: number): void {
-    this.librarianService.validateReservation(id)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(() => {
-        this.allReservations.update(list =>
-          list.map(r => r.id === id ? { ...r, status: 'DISPONIBLE' } : r)
-        );
-      });
-  }
-
   toLoanBook(loan: LibrarianLoan): Book {
     return {
       key: String(loan.id),

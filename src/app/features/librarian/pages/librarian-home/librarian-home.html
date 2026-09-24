@@ -109,7 +109,7 @@
     <aside class="comptoir-aside">
 
       <section class="aside-section">
-        <h3 class="aside-title">Réservations à préparer</h3>
+        <h3 class="aside-title">Réservations en attente</h3>
         @if (pendingReservations().length === 0) {
           <p class="empty-state">Aucune réservation en attente.</p>
         } @else {
@@ -123,7 +123,7 @@
                 <p class="reservation-member">pour {{ r.userName }}</p>
                 <p class="reservation-date">Réservé le {{ r.reservationDate | slice:0:10 }}</p>
               </div>
-              <button class="btn-prepare" (click)="validateReservation(r.id)">Préparer</button>
+              <span class="btn-prepare">Rang {{ r.rankWaitingList }}</span>
             </div>
           }
         }

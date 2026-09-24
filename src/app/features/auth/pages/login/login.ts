@@ -23,6 +23,9 @@ export class Login {
   successMessage = this.route.snapshot.queryParamMap.get('registered') === '1'
     ? 'Compte cree, vous pouvez maintenant vous connecter.'
     : '';
+  expiredMessage = this.route.snapshot.queryParamMap.get('expired') === 'true'
+    ? 'Votre session a expire, veuillez vous reconnecter.'
+    : '';
 
   onSubmit(): void {
     this.errorMessage = '';

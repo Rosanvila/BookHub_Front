@@ -1,17 +1,17 @@
-<button class="btn-reserve" type="button"
+<button class="btn-borrow" type="button"
     [disabled]="loading() || done() || alreadyBorrowed()"
-    (click)="reserve()">
+    (click)="borrow()">
     @if (alreadyBorrowed()) {
         Déjà emprunté
     } @else if (done()) {
-        Réservé
+        Emprunté ✓
     } @else if (loading()) {
         En cours...
     } @else {
         <app-icon name="book" [size]="15" />
-        Réserver ce livre
+        Emprunter ce livre
     }
 </button>
 @if (errorMsg()) {
-<p class="reserve-error">{{ errorMsg() }}</p>
+<p class="borrow-error">{{ errorMsg() }}</p>
 }

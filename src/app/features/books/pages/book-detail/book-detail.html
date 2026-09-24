@@ -44,9 +44,11 @@
             }
 
             <div class="hero-actions">
-                <app-reserve-button
-                    [bookId]="book()!.id"
-                    [exemplairesDisponibles]="book()!.exemplairesDisponibles" />
+                @if (book()!.exemplairesDisponibles > 0) {
+                    <app-borrow-button [bookId]="book()!.id" />
+                } @else {
+                    <app-reserve-button [bookId]="book()!.id" />
+                }
                 <button class="btn-ghost" type="button">
                     <app-icon name="bookmark" [size]="15" />
                     Favoris

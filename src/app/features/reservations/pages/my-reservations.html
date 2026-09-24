@@ -17,12 +17,19 @@
       <a routerLink="/catalog" class="btn-catalog">Parcourir le catalogue</a>
     </div>
   } @else {
+    @if (errorMsg()) {
+      <p class="reservations-error">{{ errorMsg() }}</p>
+    }
     <div class="reservations-list">
       @for (r of reservations(); track r.id) {
         <div class="reservation-card">
           <div class="reservation-rank">
-            <span class="rank-number">{{ r.rankWaitingList }}</span>
-            <span class="rank-label">en file</span>
+            @if (r.status === 'EN_ATTENTE') {
+              <span class="rank-number">{{ r.rankWaitingList }}</span>
+              <span class="rank-label">en file</span>
+            } @else {
+              <span class="rank-number">–</span>
+            }
           </div>
           <div class="reservation-info">
             <p class="reservation-title">{{ r.bookTitle }}</p>
@@ -30,6 +37,13 @@
           </div>
           <div class="reservation-status">
             <span class="status-badge">{{ r.status }}</span>
+            @if (canCancel(r)) {
+              <button class="btn-cancel" type="button"
+                [disabled]="cancelling() === r.id"
+                (click)="cancel(r)">
+                {{ cancelling() === r.id ? 'Annulation...' : 'Annuler' }}
+              </button>
+            }
           </div>
         </div>
       }

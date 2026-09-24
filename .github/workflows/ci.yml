@@ -6,51 +6,29 @@ on:
   pull_request:
     branches: [ main ]
 
-# Annule une exécution encore en cours lorsqu'un nouveau commit est poussé sur la
-# même branche : inutile de continuer à valider un état déjà obsolète.
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 permissions:
   contents: read
 
-env:
-  NODE_VERSION: '22'
-
 jobs:
   build-and-test:
-    name: Construction et tests
+    name: Build and test
     runs-on: ubuntu-latest
 
     steps:
-      - name: Récupération du code
+      - name: Checkout
         uses: actions/checkout@v5
 
-      - name: Installation de Node ${{ env.NODE_VERSION }}
+      - name: Setup Node
         uses: actions/setup-node@v5
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: '22'
           cache: 'npm'
 
-      # npm ci installe strictement les versions du fichier de verrouillage :
-      # l'installation est reproductible, contrairement à npm install.
-      - name: Installation des dépendances
+      - name: Install dependencies
         run: npm ci
 
-      # Étape la plus rentable de la chaîne : la compilation TypeScript et des
-      # templates détecte les erreurs de typage, les imports cassés et les
-      # configurations de rendu invalides avant toute fusion.
-      - name: Construction de production
+      - name: Production build
         run: npm run build
 
-      - name: Exécution des tests
+      - name: Run tests
         run: npm test -- --watch=false
-
-      - name: Publication du rapport de construction
-        if: success()
-        uses: actions/upload-artifact@v5
-        with:
-          name: build-front
-          path: dist/
-          retention-days: 7

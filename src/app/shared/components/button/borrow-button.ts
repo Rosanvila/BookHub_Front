@@ -1,21 +1,19 @@
 import { Component, input, inject, signal, afterNextRender, DestroyRef } from "@angular/core";
 import { IconComponent } from '../icon/icon';
-import { ReservationsService } from "../../../features/reservations/reservations.service";
 import { LoansService } from "../../../features/loans/loans.service";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { HttpErrorResponse } from "@angular/common/http";
 
 @Component({
-    selector: 'app-reserve-button',
+    selector: 'app-borrow-button',
     standalone: true,
     imports: [IconComponent],
-    templateUrl: './reserve-button.html',
-    styleUrl: './reserve-button.css',
+    templateUrl: './borrow-button.html',
+    styleUrl: './borrow-button.css',
 })
-export class ReserveButton {
+export class BorrowButton {
     bookId = input.required<number>();
 
-    private reservationsService = inject(ReservationsService);
     private loansService = inject(LoansService);
     private destroyRef = inject(DestroyRef);
 
@@ -26,16 +24,6 @@ export class ReserveButton {
 
     constructor() {
         afterNextRender(() => {
-            this.reservationsService.getMyReservations()
-                .pipe(takeUntilDestroyed(this.destroyRef))
-                .subscribe({
-                    next: (reservations) => {
-                        if (reservations.some(r => r.bookId === this.bookId() && r.status !== 'ANNULEE')) {
-                            this.done.set(true);
-                        }
-                    },
-                });
-
             this.loansService.hasActiveLoanOn(this.bookId())
                 .pipe(takeUntilDestroyed(this.destroyRef))
                 .subscribe({
@@ -44,21 +32,17 @@ export class ReserveButton {
         });
     }
 
-    reserve() {
+    borrow() {
         if (this.loading() || this.done() || this.alreadyBorrowed()) return;
         this.loading.set(true);
         this.errorMsg.set(null);
-        this.reservationsService.reserve(this.bookId()).subscribe({
+        this.loansService.borrow(this.bookId()).subscribe({
             next: () => {
                 this.done.set(true);
                 this.loading.set(false);
             },
             error: (err: HttpErrorResponse) => {
-                if (err.status === 409) {
-                    this.done.set(true);
-                } else {
-                    this.errorMsg.set(err.error?.error ?? 'La réservation a échoué.');
-                }
+                this.errorMsg.set(err.error?.error ?? "L'emprunt a échoué.");
                 this.loading.set(false);
             },
         });

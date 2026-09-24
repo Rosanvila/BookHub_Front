@@ -5,6 +5,7 @@ import { vi } from "vitest";
 
 import { ReserveButton } from "./reserve-button";
 import { ReservationsService } from "../../../features/reservations/reservations.service";
+import { LoansService } from "../../../features/loans/loans.service";
 import type { Reservation } from "../../models/reservation.model";
 
 /**
@@ -32,30 +33,30 @@ describe("ReserveButton", () => {
     getMyReservations: ReturnType<typeof vi.fn>;
     reserve: ReturnType<typeof vi.fn>;
   };
+  let loansStub: { hasActiveLoanOn: ReturnType<typeof vi.fn> };
 
   /**
    * Monte le composant avec un service simulé. Aucun appel réseau n'est émis :
    * les réponses de l'API sont décidées test par test.
    */
-  async function setUp(options: {
-    existing?: Reservation[];
-    bookId?: number;
-    disponibles?: number;
-  }) {
+  async function setUp(options: { existing?: Reservation[]; bookId?: number; borrowed?: boolean }) {
     serviceStub = {
       getMyReservations: vi.fn().mockReturnValue(of(options.existing ?? [])),
       reserve: vi.fn().mockReturnValue(of(reservation(options.bookId ?? 42, "EN_ATTENTE"))),
     };
+    loansStub = { hasActiveLoanOn: vi.fn().mockReturnValue(of(options.borrowed ?? false)) };
 
     await TestBed.configureTestingModule({
       imports: [ReserveButton],
-      providers: [{ provide: ReservationsService, useValue: serviceStub }],
+      providers: [
+        { provide: ReservationsService, useValue: serviceStub },
+        { provide: LoansService, useValue: loansStub },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(ReserveButton);
     component = fixture.componentInstance;
     fixture.componentRef.setInput("bookId", options.bookId ?? 42);
-    fixture.componentRef.setInput("exemplairesDisponibles", options.disponibles ?? 3);
     await fixture.whenStable();
   }
 
@@ -86,24 +87,48 @@ describe("ReserveButton", () => {
     expect(component.loading()).toBe(false);
   });
 
-  it("affiche un message explicite lorsque le plafond d'emprunts est atteint", async () => {
+  it("affiche le message renvoyé par l'API en cas de refus", async () => {
     await setUp({ bookId: 42 });
     serviceStub.reserve.mockReturnValue(
-      throwError(() => new HttpErrorResponse({ status: 400 })),
+      throwError(() => new HttpErrorResponse({
+        status: 400,
+        error: { error: "Ce livre est disponible, empruntez-le directement" },
+      })),
     );
 
     component.reserve();
 
     expect(component.done()).toBe(false);
-    expect(component.errorMsg()).toContain("maximum de 3 emprunts");
+    expect(component.errorMsg()).toContain("empruntez-le directement");
   });
 
-  it("n'appelle pas l'API lorsqu'aucun exemplaire n'est disponible", async () => {
-    await setUp({ bookId: 42, disponibles: 0 });
+  it("n'appelle pas l'API une seconde fois lorsque la réservation est déjà posée", async () => {
+    await setUp({ existing: [reservation(42, "EN_ATTENTE")], bookId: 42 });
 
     component.reserve();
 
-    expect(component.noStock()).toBe(true);
+    expect(component.done()).toBe(true);
+    expect(serviceStub.reserve).not.toHaveBeenCalled();
+  });
+
+  it("passe en état « déjà emprunté » lorsque le lecteur détient l'exemplaire", async () => {
+    // Le dernier exemplaire est sorti par ce lecteur : le réserver n'aurait aucun sens
+    await setUp({ bookId: 42, borrowed: true });
+
+    expect(component.alreadyBorrowed()).toBe(true);
+  });
+
+  it("laisse le bouton actif quand le service ne signale aucun emprunt", async () => {
+    await setUp({ bookId: 42, borrowed: false });
+
+    expect(component.alreadyBorrowed()).toBe(false);
+  });
+
+  it("n'appelle pas l'API de réservation si le livre est déjà emprunté", async () => {
+    await setUp({ bookId: 42, borrowed: true });
+
+    component.reserve();
+
     expect(serviceStub.reserve).not.toHaveBeenCalled();
   });
 });

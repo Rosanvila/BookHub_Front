@@ -19,8 +19,4 @@ export class ReservationsService {
     cancel(id: number) {
         return this.http.delete(`${this.url}/${id}`);
     }
-
-    validate(id: number) {
-        return this.http.put(`${this.url}/${id}/validate`, {});
-    }
 }

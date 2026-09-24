@@ -1,5 +1,6 @@
 export interface Loan {
   id: number;
+  livreId: number;
   titre: string;
   auteur: string;
   urlCouverture: string;

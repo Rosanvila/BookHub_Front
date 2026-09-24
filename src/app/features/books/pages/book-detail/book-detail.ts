@@ -5,12 +5,13 @@ import { catchError, of } from 'rxjs';
 import { BooksService } from '../../books.service';
 import { IconComponent } from '../../../../shared/components/icon/icon';
 import { ReserveButton } from '../../../../shared/components/button/reserve-button';
+import { BorrowButton } from '../../../../shared/components/button/borrow-button';
 import { BookCoverComponent } from '../../../../shared/components/book-cover/book-cover';
 import type { BookDetail as BookDetailData, Book, BookStatus } from '../../../../shared/models/book.model';
 
 @Component({
   selector: 'app-book-detail',
-  imports: [RouterLink, IconComponent, ReserveButton, BookCoverComponent],
+  imports: [RouterLink, IconComponent, ReserveButton, BorrowButton, BookCoverComponent],
   templateUrl: './book-detail.html',
   styleUrl: './book-detail.css',
 })

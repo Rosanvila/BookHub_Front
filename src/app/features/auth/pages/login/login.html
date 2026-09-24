@@ -40,6 +40,10 @@
       <label for="remember">Me maintenir connecte sur cet appareil</label>
     </div>
 
+    @if (expiredMessage) {
+      <p class="form-error">{{ expiredMessage }}</p>
+    }
+
     @if (successMessage) {
       <p class="form-success">{{ successMessage }}</p>
     }
